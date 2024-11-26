@@ -6,17 +6,19 @@ import GameComponent from "./components/GameComponent";
 import ImageCaptureComponent from "./components/ImageCaptureComponent";
 import LoginPage from "./components/LoginPage/LoginPage"; // Adjust path as necessary
 import AdminApp from "./components/AdminApp/AdminApp"; // Adjust path as necessary
+import StartGameButton from "./components/StartGameButton.jsx";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/start-game" element={<StartGameButton />} />
         <Route
           path="/game"
           element={
             <>
-              <GameComponent /> <ImageCaptureComponent />
+              <GameComponent  /> <ImageCaptureComponent /> 
             </>
           }
         />

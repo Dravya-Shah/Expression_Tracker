@@ -130,3 +130,26 @@
     transform: translateY(-15px);
   }
 }
+
+/* Add this to your GameComponent.css */
+.full-screen-message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Dark background for contrast */
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.congratulate-message {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 20px;
+}

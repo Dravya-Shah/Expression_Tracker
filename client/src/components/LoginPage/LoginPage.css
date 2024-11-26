@@ -1,72 +1,228 @@
-/* Full-screen container with a background image and centered login box */
-.outer-container {
-  height: 100vh;
-  width: 100vw;
+/* .outer-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  position: relative; /* For overlay purposes */
+  justify-content: flex-end;
+  height: 100vh;
+  background: #f0f0f0;
+  position: relative;
+  
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+}
+
+.semicircle {
+  width: 50%;
+  height: 100%;
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+  background: #fff;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 50px;
+  z-index: 1;
+}
+
+.login-box {
+  width: 300px;
+  background: #ffffff;
+  padding: 30px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.input-field {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.input-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.input-field input {
+  width: 100%;
+  padding: 10px 35px 10px 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.input-field input:focus {
+  border-color: #007bff;
+}
+
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  flex: 1;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #007bff;
+}
+
+.toggle-password-btn:hover {
+  color: #0056b3;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+} */
+ /* General Styles */
+ 
+ .outer-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000; /* Fallback background color */
   background-image: url('./img2.jpg'); /* Background image */
   background-size: cover; /* Cover the full viewport */
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* No repeating */
-  opacity: 0.5; /* Make the image slightly visible */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity:0.5/* Increased opacity for darker background */
 }
 
-/* Semi-transparent overlay to darken the background */
+/* Darker semi-transparent overlay to darken the background */
 .overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Dark semi-transparent overlay */
-  z-index: 1; /* Layer the overlay behind the login box */
+  background: rgba(0, 0, 0, 0.6);  /* Darker overlay */
+  z-index: 1;
+  
 }
 
-/* Centered login box */
+/* Dark semicircular container */
+.semicircle {
+  position: absolute;
+  right: 0;
+  width: 35%; /* Reduced width for better proportions */
+  height: 100%; /* Reduced height */
+  border-radius: 70% 0 0 70%;
+  background: #333; /* Dark background without transparency */
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Login form directly inside the semicircle */
 .login-box {
-  background: rgba(255, 255, 255, 0.8); /* Semi-transparent login box */
-  width: 600px; /* Wider login box */
-  padding: 60px; /* More padding inside the box */
-  border-radius: 12px;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3); /* Add shadow */
-  z-index: 2; /* Ensure the login box is above the overlay */
+  color: aqua;
+  width: 80%;
+  max-width: 400px;
   text-align: center;
-  position: relative;
 }
 
-/* Input fields styling */
+.login-box h1 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #ffffff2c; /* Light text color for contrast */
+}
+
 .input-field {
-  margin-bottom: 30px;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
-label {
+.input-field label {
   display: block;
-  margin-bottom: 12px;
-  font-size: 1.5rem; /* Larger font for labels */
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #ddd; /* Light text color */
 }
 
-input {
+.input-field input {
   width: 100%;
-  padding: 14px;
-  font-size: 1.5rem;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #444; /* Darker border */
+  background-color: #222; /* Dark input background */
+  color: #fff; /* Light text for inputs */
   border-radius: 5px;
-  border: 1px solid #665f5f;
+  box-sizing: border-box;
 }
 
-/* Button styling */
-button {
+.password-container {
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  flex-grow: 1;
+}
+
+.toggle-password-btn {
+  display: flex;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #bbb; /* Light button text */
+  margin-left: 10px;
+}
+
+button[type="submit"] {
   width: 100%;
-  padding: 16px;
-  font-size: 1.5rem;
-  background-color: #538ecd;
-  color: white;
+  padding: 10px;
+  background: #444; /* Dark button background */
+  color: #fff;
   border: none;
   border-radius: 5px;
+  font-size: 16px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #0056b3;
+button[type="submit"]:hover {
+  background: #555; /* Slightly lighter on hover */
 }
