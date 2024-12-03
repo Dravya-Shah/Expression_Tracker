@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import './GameComponent.css';
-import ImageCapture from './ImageCaptureComponent';
+import ImageCapture from '../ImageCaptureComponent';
 
 const shapes = ['circle', 'square', 'triangle'];
 
