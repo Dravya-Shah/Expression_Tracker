@@ -1,4 +1,3 @@
-
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -40,10 +39,7 @@ const UserProfile = mongoose.model("UserProfile", userProfileSchema);
 
 // MongoDB Connection
 mongoose
-  .connect(
-    "mongodb+srv://user1:user1@dravya01.ioeeo.mongodb.net/?retryWrites=true&w=majority&appName=Dravya01",
-    {}
-  )
+  .connect("", {})
   .then(() => {
     console.log("Connected to MongoDB successfully");
     uploadDefaultProfiles();
@@ -166,7 +162,7 @@ async function analyzeImage(imagePath, retryCount = 0, maxRetries = 5) {
       imageBuffer,
       {
         headers: {
-          Authorization: "Bearer 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",
+          Authorization: "",
           "Content-Type": "application/json",
         },
       }
@@ -201,10 +197,7 @@ async function analyzeImage(imagePath, retryCount = 0, maxRetries = 5) {
 
     response.data.forEach((result) => {
       if (result.label.toLowerCase() in emotions) {
-        emotions[result.label.toLowerCase()] = (
-          (result.score / totalScore) *
-          100
-        ).toFixed(2);
+        emotions[result.label.toLowerCase()] = (result.score * 100).toFixed(2); // Convert score to percentage- 100%
       }
     });
 
@@ -275,49 +268,48 @@ app.post("/login", async (req, res) => {
 
 // Start session route
 app.get("/start-session", async (req, res) => {
-  console.log("Entered Server");
-
-  const currentSessionId = `session_${Date.now()}`;
-  console.log("Generated Session ID:", currentSessionId);
-
   const username = req.query.username;
-  console.log("Received Username:", username);
 
   if (!username) {
-    console.log("No username provided");
     return res.status(400).json({ message: "Username is required" });
   }
 
   try {
-    console.log("Checking if username exists in the database...");
-
     const userProfile = await UserProfile.findOne({ name: username });
 
     if (!userProfile) {
-      console.log("User profile not found for username:", username);
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log("User profile found:", userProfile);
+    // Check for recent active sessions (within last 5 seconds)
+    const fiveSecondsAgo = new Date(Date.now() - 5000);
+    const recentSessions = userProfile.sessions.filter(
+      (session) => session.createdAt > fiveSecondsAgo
+    );
 
-    if (userProfile.role === "kid") {
-      console.log("User is a kid; updating session IDs...");
+    let currentSessionId;
+    if (recentSessions.length > 0) {
+      // Reuse the most recent active session
+      currentSessionId = recentSessions[recentSessions.length - 1].sessionId;
+    } else {
+      // Generate a new session ID
+      currentSessionId = `session_${Date.now()}`;
 
-      await UserProfile.findOneAndUpdate(
-        { name: username },
-        {
-          $push: {
-            sessions: {
-              sessionId: currentSessionId,
-              createdAt: new Date(), // Add a timestamp for the session
+      // Add new session only if user is a kid
+      if (userProfile.role === "kid") {
+        await UserProfile.findOneAndUpdate(
+          { name: username },
+          {
+            $push: {
+              sessions: {
+                sessionId: currentSessionId,
+                createdAt: new Date(),
+              },
             },
           },
-        },
-        { new: true, useFindAndModify: false }
-      );
-      console.log("Session ID added for user:", username);
-    } else {
-      console.log("User is admin; session ID not added.");
+          { new: true, useFindAndModify: false }
+        );
+      }
     }
 
     res.json({ sessionId: currentSessionId });
@@ -349,10 +341,32 @@ app.post(
     res.json({ message: "Images uploaded successfully!" });
   }
 );
+
+app.get("/sessions", async (req, res) => {
+  try {
+    const analyses = await Analysis.find({}, "sessionId createdAt").sort({
+      createdAt: -1,
+    });
+
+    const sessionsFromDB = analyses.map((analysis) => analysis.sessionId);
+
+    const sessionsDir = path.join(__dirname, "uploads", "webcam_images");
+    const filesystemSessions = await fs.promises.readdir(sessionsDir);
+
+    const allSessions = [
+      ...new Set([...sessionsFromDB, ...filesystemSessions]),
+    ];
+
+    res.json({ sessions: allSessions });
+  } catch (error) {
+    console.error("Error fetching sessions:", error);
+    res.status(500).json({ error: "Error reading sessions" });
+  }
+});
+
 app.get("/api/sessions", async (req, res) => {
   try {
-    // Fetch sessions from the database
-    const dbSessions = await UserProfile.aggregate([
+    const sessions = await UserProfile.aggregate([
       { $unwind: "$sessions" }, // Flatten the `sessions` array
       {
         $group: {
@@ -368,43 +382,12 @@ app.get("/api/sessions", async (req, res) => {
       { $project: { username: "$_id", _id: 0, sessions: 1 } }, // Restructure the output
     ]);
 
-    // Map database session IDs for quick comparison
-    const dbSessionIds = dbSessions
-      .flatMap((user) => user.sessions.map((session) => session.sessionId));
-
-    // Fetch sessions from the filesystem
-    const sessionsDir = path.join(__dirname, "uploads", "webcam_images");
-    let filesystemSessions = [];
-    try {
-      filesystemSessions = await fs.promises.readdir(sessionsDir);
-    } catch (error) {
-      console.warn("Filesystem sessions directory not found:", error);
-    }
-
-    // Filter filesystem sessions not already in the database
-    const additionalSessions = filesystemSessions.filter(
-      (fsSession) => !dbSessionIds.includes(fsSession)
-    );
-
-    // Merge filesystem-only sessions into the result
-    const combinedSessions = [...dbSessions];
-    if (additionalSessions.length > 0) {
-      combinedSessions.push({
-        username: "Filesystem Only", // Label for unmatched filesystem sessions
-        sessions: additionalSessions.map((sessionId) => ({
-          sessionId,
-          createdAt: null, // Filesystem sessions may not have a `createdAt`
-        })),
-      });
-    }
-
-    res.json(combinedSessions);
+    res.json(sessions);
   } catch (error) {
     console.error("Error fetching sessions:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).send("Internal Server Error");
   }
 });
-
 
 app.get("/analyze/:sessionId", async (req, res) => {
   const { sessionId } = req.params;
