@@ -39,7 +39,7 @@ const UserProfile = mongoose.model("UserProfile", userProfileSchema);
 
 // MongoDB Connection
 mongoose
-  .connect("", {})
+  .connect("mongodb+srv://user1:user1@dravya01.ioeeo.mongodb.net/?retryWrites=true&w=majority&appName=Dravya01", {})
   .then(() => {
     console.log("Connected to MongoDB successfully");
     uploadDefaultProfiles();
@@ -162,7 +162,7 @@ async function analyzeImage(imagePath, retryCount = 0, maxRetries = 5) {
       imageBuffer,
       {
         headers: {
-          Authorization: "",
+          Authorization: "Bearer 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",
           "Content-Type": "application/json",
         },
       }
