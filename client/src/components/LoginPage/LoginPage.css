@@ -84,3 +84,28 @@ button:hover {
   font-weight: bold;
   color: #5e5656;
 }
+
+
+.password-container {
+  position: relative;
+}
+
+
+
+/* Style for the show/hide password emoji button */
+.show-password-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 20px; /* Emoji size */
+  cursor: pointer;
+  color: #007bff;
+}
+
+/* Hover effect for the show password emoji button */
+.show-password-btn:hover {
+  color: #0056b3;
+}

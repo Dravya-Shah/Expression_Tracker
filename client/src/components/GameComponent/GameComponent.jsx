@@ -1,3 +1,4 @@
+// src/components/GameComponent.jsx
 import React, { useState, useEffect } from 'react';
 import './GameComponent.css';
 import ImageCapture from '../ImageCapture/ImageCaptureComponent';
@@ -28,12 +29,13 @@ function GameComponent() {
   const startSession = async () => {
     try {
       const response = await fetch(`http://localhost:5000/start-session?username=${username}`);
-      const data = await response.json();
+      const data = await response.json();  
       setSessionId(data.sessionId);
+      return data.sessionId;
     } catch (error) {
       console.error('Error creating session:', error);
     }
-  };
+  };;
 
   useEffect(() => {
     startSession();
@@ -107,26 +109,7 @@ function GameComponent() {
       setIsGameActive(false);
     }
   };
-
-  // const endSession = async () => {
-  //   try {
-  //     await fetch(`http://localhost:5000/end-session`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         sessionId,
-  //         username,
-  //         score,
-  //         totalQuestions: questions.length
-  //       }),
-  //     });
-  //   } catch (error) {
-  //     console.error('Error ending session:', error);
-  //   }
-  // };
-
+  
   const restartGame = async () => {
     await startSession();
     setScore(0);
@@ -180,7 +163,7 @@ function GameComponent() {
     return (
       <div className="app">
         <h1 className="game-title">Shape Counting Game</h1>
-        <div className="game-container">
+        <div className="score-container">
           <p className="result">Your score: {score} / {questions.length}</p>
           <button
             className="restart-btn"
@@ -205,9 +188,8 @@ function GameComponent() {
           
         />
       )}
-      <h1 className="game-title">Shape Counting Game</h1>
       <div className="game-container">
-        <h3>How many <span className="target-shape">{shape}s</span> are in the sequence?</h3>
+        <h3 className="game-container-h3">How many <span className="target-shape">{shape}s</span> are in the sequence?</h3>
         <div className="shape-sequence">
           {sequence.map((s, index) => (
             <div 
@@ -252,7 +234,7 @@ function GameComponent() {
               onClick={nextQuestion}
               aria-label="Next Question"
             >
-              Next Question
+              &rarr;
             </button>
           </div>
         )}

@@ -6,6 +6,7 @@ import "./LoginPage.css"; // Link the CSS file
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State to control password visibility
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -58,16 +59,23 @@ function LoginPage() {
           </div>
 
           {/* Input for password */}
-          <div className="input-field">
+          <div className="input-field password-container">
             <input
-              type="password"
-              placeholder="password"
+              type={showPassword ? "text" : "password"} // Toggle between 'text' and 'password'
+              placeholder="Password"
               id="password"
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="show-password-btn"
+              onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
+            >
+              {showPassword ? "🙈" : "👁️"} {/* Emoji for show/hide password */}
+            </button>
           </div>
 
           {/* Submit button */}

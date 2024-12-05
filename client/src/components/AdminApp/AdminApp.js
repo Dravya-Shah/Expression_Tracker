@@ -6,6 +6,8 @@ import "./AnalysisView.css";
 
 function AdminApp() {
   const [sessions, setSessions] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
   const [analysisData, setAnalysisData] = useState(null);
@@ -23,6 +25,8 @@ function AdminApp() {
       }
       const data = await response.json();
       setSessions(data);
+      const uniqueUsers = [...new Set(data.map(user => user.username))];
+      setUsers(uniqueUsers);
     } catch (error) {
       console.error("Error fetching sessions:", error);
     } finally {
@@ -63,52 +67,70 @@ function AdminApp() {
     const date = new Date(dateString);
     return date.toLocaleString();
   };
+  const handleUserChange = (event) => {
+    setSelectedUser(event.target.value);
+  };
 
-  const renderSessionsList = () => (
-    <div className="sessions-list-container">
-      <h2>Admin Dashboard</h2>
-      <h3>Session List</h3>
-      {isLoading ? (
-        <p>Loading sessions...</p>
-      ) : (
-        <div className="table-container1">
-          <table className="sessions-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Session ID</th>
-                <th>Date & Time</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((user) => (
-                <React.Fragment key={user.username}>
-                  {user.sessions.map((session, index) => (
+  const renderSessionsList = () => {
+    const filteredSessions = selectedUser
+      ? sessions.filter(user => user.username === selectedUser)
+      : sessions;
+
+    return (
+      <div className="sessions-list-container">
+        <h2>Admin Dashboard</h2>
+        <div className="user-filter">
+          <select 
+            value={selectedUser} 
+            onChange={handleUserChange}
+            className="user-dropdown"
+          >
+            <option value="">Select Username</option>
+            {users.map(username => (
+              <option key={username} value={username}>
+                {username}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {isLoading ? (
+          <p>Loading sessions...</p>
+        ) : selectedUser ? (
+          <div className="table-container1">
+            <table className="sessions-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Date & Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSessions.map(user => (
+                  user.sessions.map((session, index) => (
                     <tr key={session.sessionId}>
-                      {index === 0 && (
-                        <td rowSpan={user.sessions.length}>{user.username}</td>
-                      )}
                       <td>{session.sessionId}</td>
                       <td>{new Date(session.createdAt).toLocaleString()}</td>
                       <td>
-                        <button
-                          onClick={() => handleSessionClick(session.sessionId)}
-                        >
+                        <button onClick={() => handleSessionClick(session.sessionId)}>
                           Get Analysis
                         </button>
                       </td>
                     </tr>
-                  ))}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-
+                  ))
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="select-prompt">Please select a username to view sessions</p>
+        )}
+      </div>
+    );
+  };
+  
+  
   const renderBarChart = () => {
     if (
       !analysisData ||
