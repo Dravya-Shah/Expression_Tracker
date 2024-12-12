@@ -9,7 +9,7 @@
     height: 100vh; /* Full screen height */
     width: 100vw; /* Full screen width */
     overflow: hidden; /* Prevent overall page scrolling */
-    background-image: url('background.jpg'); /* Update with your actual image path */
+    background-image: url('admin_background.jpg'); /* Update with your actual image path */
     background-size: cover; /* Ensure the background image covers the entire area */
     background-position: center; /* Center the background image */
     background-repeat: no-repeat; /* Prevent tiling of the background image */
@@ -113,11 +113,11 @@ h2, h3 {
     border-bottom: 2px solid #ccc; /* Thin light gray line between groups */
 }
 
-
 /* Hover effect for rows */
 .sessions-table tr:hover {
     background-color: #f9f9f9; /* Subtle background change on hover */
 }
+
 .user-dropdown {
     width: 100%;
     padding: 12px 20px;

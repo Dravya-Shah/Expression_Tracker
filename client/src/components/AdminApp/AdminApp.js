@@ -7,10 +7,11 @@ import "./AnalysisView.css";
 function AdminApp() {
   const [sessions, setSessions] = useState([]);
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState("");
   const [selectedSession, setSelectedSession] = useState(null);
   const [analysisData, setAnalysisData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
 
   useEffect(() => {
     fetchSessions();
@@ -20,12 +21,12 @@ function AdminApp() {
     setIsLoading(true);
     try {
       const response = await fetch("http://localhost:5000/api/sessions");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      if (!response.ok) throw new Error("Network response was not ok");
+
       const data = await response.json();
       setSessions(data);
-      const uniqueUsers = [...new Set(data.map(user => user.username))];
+
+      const uniqueUsers = [...new Set(data.map((user) => user.username))];
       setUsers(uniqueUsers);
     } catch (error) {
       console.error("Error fetching sessions:", error);
@@ -36,6 +37,7 @@ function AdminApp() {
 
   const handleSessionClick = async (sessionId) => {
     setSelectedSession(sessionId);
+    setIsAnalysisLoading(true);
     try {
       const response = await fetch(
         `http://localhost:5000/analyze/${sessionId}`
@@ -46,14 +48,15 @@ function AdminApp() {
             imageAnalyses: [],
             overallAnalysis: { emotions: {} },
           });
-        } else {
-          throw new Error("Network response was not ok");
-        }
+        } else throw new Error("Network response was not ok");
+      } else {
+        const data = await response.json();
+        setAnalysisData(data);
       }
-      const data = await response.json();
-      setAnalysisData(data);
     } catch (error) {
       console.error("Error analyzing session:", error);
+    } finally {
+      setIsAnalysisLoading(false);
     }
   };
 
@@ -62,82 +65,90 @@ function AdminApp() {
     setAnalysisData(null);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
   const handleUserChange = (event) => {
     setSelectedUser(event.target.value);
   };
 
   const renderSessionsList = () => {
     const filteredSessions = selectedUser
-      ? sessions.filter(user => user.username === selectedUser)
+      ? sessions.filter((user) => user.username === selectedUser)
       : sessions;
 
     return (
       <div className="sessions-list-container">
         <h2>Admin Dashboard</h2>
-        <div className="user-filter">
-          <select 
-            value={selectedUser} 
-            onChange={handleUserChange}
-            className="user-dropdown"
-          >
-            <option value="">Select Username</option>
-            {users.map(username => (
-              <option key={username} value={username}>
-                {username}
-              </option>
-            ))}
-          </select>
-        </div>
-        
         {isLoading ? (
           <p>Loading sessions...</p>
-        ) : selectedUser ? (
-          <div className="table-container1">
-            <table className="sessions-table">
-              <thead>
-                <tr>
-                  <th>Session ID</th>
-                  <th>Date & Time</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSessions.map(user => (
-                  user.sessions.map((session, index) => (
-                    <tr key={session.sessionId}>
-                      <td>{session.sessionId}</td>
-                      <td>{new Date(session.createdAt).toLocaleString()}</td>
-                      <td>
-                        <button onClick={() => handleSessionClick(session.sessionId)}>
-                          Get Analysis
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ))}
-              </tbody>
-            </table>
-          </div>
         ) : (
-          <p className="select-prompt">Please select a username to view sessions</p>
+          <>
+            <div className="user-filter">
+              <select
+                value={selectedUser}
+                onChange={handleUserChange}
+                className="user-dropdown"
+              >
+                <option value="" disabled hidden>
+                  Select User
+                </option>
+                {users.map((username) => (
+                  <option key={username} value={username}>
+                    {username}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedUser ? (
+              <div className="table-container1">
+                <table className="sessions-table">
+                  <thead>
+                    <tr>
+                      <th>Session ID</th>
+                      <th>Date & Time</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredSessions.map((user) =>
+                      user.sessions.map((session) => (
+                        <tr key={session.sessionId}>
+                          <td>{session.sessionId}</td>
+                          <td>
+                            {new Date(session.createdAt).toLocaleString()}
+                          </td>
+                          <td>
+                            <button
+                              onClick={() =>
+                                handleSessionClick(session.sessionId)
+                              }
+                            >
+                              Get Analysis
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="select-prompt">
+                Please select a username to view sessions
+              </p>
+            )}
+          </>
         )}
       </div>
     );
   };
-  
-  
+
   const renderBarChart = () => {
     if (
       !analysisData ||
       !analysisData.overallAnalysis ||
       Object.keys(analysisData.overallAnalysis.emotions).length === 0
-    )
+    ) {
       return null;
+    }
 
     const emotions = analysisData.overallAnalysis.emotions;
     const emotionLabelsWithEmojis = {
@@ -159,9 +170,9 @@ function AdminApp() {
       datasets: [
         {
           label: "Emotion Percentage",
-          data: Object.values(emotions).map((v) => parseFloat(v)),
-          backgroundColor: "#4BC0C0",
-          borderColor: "#36A2EB",
+          data: Object.values(emotions).map((value) => parseFloat(value)),
+          backgroundColor: "#684ea5",
+          borderColor: "#E0BFEF",
           borderWidth: 1,
         },
       ],
@@ -170,19 +181,10 @@ function AdminApp() {
     const options = {
       responsive: true,
       plugins: {
-        legend: {
-          position: "top",
-        },
-        title: {
-          display: true,
-          text: "Emotion Distribution",
-        },
+        legend: { position: "top" },
+        title: { display: true, text: "Emotion Distribution" },
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
+      scales: { y: { beginAtZero: true } },
     };
 
     return (
@@ -245,23 +247,28 @@ function AdminApp() {
     );
   };
 
+  const renderAnalysis = () => {
+    if (isAnalysisLoading) {
+      return (
+        <p className="isloading-container">Loading analysis, please wait...</p>
+      );
+    }
+
+    return (
+      <>
+        {renderBarChart()}
+        {renderTable()}
+        <button onClick={handleBackToSessions} className="back-to-sessions-btn">
+          ← Back to Sessions
+        </button>
+      </>
+    );
+  };
+
   return (
     <div className="admin-app-container">
       <div className="content-container">
-        {selectedSession ? (
-          <>
-            {renderBarChart()}
-            {renderTable()}
-            <button
-              onClick={handleBackToSessions}
-              className="back-to-sessions-btn"
-            >
-              ← Back to Sessions
-            </button>
-          </>
-        ) : (
-          renderSessionsList()
-        )}
+        {selectedSession ? renderAnalysis() : renderSessionsList()}
       </div>
     </div>
   );
