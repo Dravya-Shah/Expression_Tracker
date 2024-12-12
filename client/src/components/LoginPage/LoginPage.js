@@ -69,13 +69,7 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button
-              type="button"
-              className="show-password-btn"
-              onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
-            >
-              {showPassword ? "🙈" : "👁️"} {/* Emoji for show/hide password */}
-            </button>
+           
           </div>
 
           {/* Submit button */}
